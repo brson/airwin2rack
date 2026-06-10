@@ -219,7 +219,13 @@ void AWLookAndFeel::setLightTheme()
 
 juce::Font AWLookAndFeel::getPopupMenuFont()
 {
-    return AWC_JUCE_FONT_CTOR(jakartaSansMedium).withHeight(16);
+    return AWC_JUCE_FONT_CTOR(jakartaSansMedium).withHeight(16 * zoomFactor);
+}
+
+juce::Font AWEffectPopupLookAndFeel::getPopupMenuFont()
+{
+    auto f = juce::LookAndFeel_V4::getPopupMenuFont();
+    return f.withHeight(f.getHeight() * zoomFactor);
 }
 
 void AWLookAndFeel::drawPopupMenuBackgroundWithOptions(juce::Graphics &g, int width, int height,
@@ -1676,6 +1682,7 @@ AWConsolidatedAudioProcessorEditor::AWConsolidatedAudioProcessorEditor(
 
     resized();
     sizeBasedOnDocAreaDisplay();
+    applyZoom();
 }
 
 AWConsolidatedAudioProcessorEditor::~AWConsolidatedAudioProcessorEditor()
@@ -2199,6 +2206,22 @@ juce::PopupMenu AWConsolidatedAudioProcessorEditor::makeSettingsMenu(bool withHe
 
     settingsMenu.addSubMenu("Documentation Font", fsMenu);
 
+    auto zoomMenu = juce::PopupMenu();
+    int currentZoomPct = 100;
+    if (processor.properties)
+        currentZoomPct = processor.properties->getIntValue("zoomLevel", 100);
+    for (int pct : {75, 100, 125, 150, 175, 200})
+    {
+        zoomMenu.addItem(juce::String(pct) + "%", true, pct == currentZoomPct,
+                         [pct, w = juce::Component::SafePointer(this)]() {
+                             if (!w)
+                                 return;
+                             w->processor.properties->setValue("zoomLevel", pct);
+                             w->applyZoom();
+                         });
+    }
+    settingsMenu.addSubMenu("Zoom", zoomMenu);
+
     settingsMenu.addItem("Show Documentation", true, isDocDisplayed(),
                          [w = juce::Component::SafePointer(this)]() {
                              if (w)
@@ -2539,6 +2562,21 @@ void AWConsolidatedAudioProcessorEditor::sizeBasedOnDocAreaDisplay()
     {
         setSize(baseWidth - 270, baseHeight);
     }
+    repaint();
+}
+
+void AWConsolidatedAudioProcessorEditor::applyZoom()
+{
+    int pct = 100;
+    if (processor.properties)
+        pct = processor.properties->getIntValue("zoomLevel", 100);
+    pct = juce::jlimit(50, 300, pct);
+    zoomFactor = pct / 100.f;
+    if (lnf)
+        lnf->zoomFactor = zoomFactor;
+    if (popupLnf)
+        popupLnf->zoomFactor = zoomFactor;
+    setTransform(juce::AffineTransform::scale(zoomFactor));
     repaint();
 }
 

@@ -115,15 +115,19 @@ struct AWLookAndFeel : public juce::LookAndFeel_V4
                                             const juce::PopupMenu::Options &o) override;
 
     juce::PropertiesFile *propFileWeak{nullptr};
+    float zoomFactor{1.f};
 };
 
 struct AWEffectPopupLookAndFeel : public juce::LookAndFeel_V4
 {
     AWEffectPopupLookAndFeel() = default;
+    juce::Font getPopupMenuFont() override;
     void drawPopupMenuItem(juce::Graphics &, const juce::Rectangle<int> &area, bool isSeparator,
                            bool isActive, bool isHighlighted, bool isTicked, bool hasSubMenu,
                            const juce::String &text, const juce::String &shortcutKeyText,
                            const juce::Drawable *icon, const juce::Colour *textColour) override;
+
+    float zoomFactor{1.f};
 };
 
 class AWConsolidatedAudioProcessorEditor : public juce::AudioProcessorEditor,
@@ -157,6 +161,9 @@ class AWConsolidatedAudioProcessorEditor : public juce::AudioProcessorEditor,
     AWConsolidatedAudioProcessor &processor;
 
     static constexpr int baseWidth = 600, baseHeight = 600;
+
+    float zoomFactor{1.f};
+    void applyZoom();
 
     struct IdleTimer : juce::Timer
     {
