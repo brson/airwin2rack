@@ -163,7 +163,9 @@ class AWConsolidatedAudioProcessorEditor : public juce::AudioProcessorEditor,
     static constexpr int baseWidth = 600, baseHeight = 600;
 
     float zoomFactor{1.f};
+    float hostScaleFactor{1.f};
     void applyZoom();
+    void setScaleFactor(float newScale) override;
 
     struct IdleTimer : juce::Timer
     {

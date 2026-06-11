@@ -2576,8 +2576,14 @@ void AWConsolidatedAudioProcessorEditor::applyZoom()
         lnf->zoomFactor = zoomFactor;
     if (popupLnf)
         popupLnf->zoomFactor = zoomFactor;
-    setTransform(juce::AffineTransform::scale(zoomFactor));
+    setTransform(juce::AffineTransform::scale(hostScaleFactor * zoomFactor));
     repaint();
+}
+
+void AWConsolidatedAudioProcessorEditor::setScaleFactor(float newScale)
+{
+    hostScaleFactor = newScale;
+    applyZoom();
 }
 
 void AWConsolidatedAudioProcessorEditor::addCurrentAsFavorite()
